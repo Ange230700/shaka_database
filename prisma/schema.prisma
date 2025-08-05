@@ -1,0 +1,112 @@
+// prisma\schema.prisma
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./generated/client"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Influencer {
+  influencer_id       Int                   @id @default(autoincrement()) @db.UnsignedInt
+  influencer_name     String?               @db.VarChar(255)
+  SurfSpot_Influencer SurfSpot_Influencer[]
+}
+
+model Photo {
+  photo_id     Int         @id @default(autoincrement()) @db.UnsignedInt
+  surf_spot_id Int         @db.UnsignedInt
+  width        Int?
+  height       Int?
+  url          String?     @db.Text
+  filename     String?     @db.VarChar(255)
+  size_bytes   Int?
+  mime_type    String?     @db.VarChar(255)
+  SurfSpot     SurfSpot    @relation(fields: [surf_spot_id], references: [surf_spot_id], onUpdate: Restrict, map: "photo_surf_spot_id_foreign")
+  Thumbnail    Thumbnail[]
+
+  @@index([surf_spot_id], map: "photo_surf_spot_id_foreign")
+}
+
+model SurfBreakType {
+  surf_break_type_id     Int                      @id @default(autoincrement()) @db.UnsignedInt
+  surf_break_type_name   String                   @unique(map: "surfbreaktype_surf_break_type_name_unique") @db.VarChar(255)
+  SurfSpot_SurfBreakType SurfSpot_SurfBreakType[]
+}
+
+model SurfSpot {
+  surf_spot_id           Int                      @id @default(autoincrement()) @db.UnsignedInt
+  destination            String                   @db.VarChar(255)
+  address                String                   @db.VarChar(255)
+  state_country          String?                  @db.VarChar(255)
+  difficulty_level       Int?                     @db.TinyInt
+  peak_season_begin      DateTime?                @db.Date
+  peak_season_end        DateTime?                @db.Date
+  magic_seaweed_link     String?                  @db.VarChar(255)
+  created_time           DateTime?                @db.DateTime(0)
+  geocode_raw            String?                  @db.Text
+  Photo                  Photo[]
+  SurfSpot_Influencer    SurfSpot_Influencer[]
+  SurfSpot_SurfBreakType SurfSpot_SurfBreakType[]
+  SurfSpot_Traveller     SurfSpot_Traveller[]
+
+  @@index([peak_season_begin], map: "surfspot_peak_season_begin_index")
+  @@index([peak_season_end], map: "surfspot_peak_season_end_index")
+}
+
+model SurfSpot_Influencer {
+  surf_spot_id  Int        @db.UnsignedInt
+  influencer_id Int        @db.UnsignedInt
+  Influencer    Influencer @relation(fields: [influencer_id], references: [influencer_id], onUpdate: Restrict, map: "surfspot_influencer_influencer_id_foreign")
+  SurfSpot      SurfSpot   @relation(fields: [surf_spot_id], references: [surf_spot_id], onUpdate: Restrict, map: "surfspot_influencer_surf_spot_id_foreign")
+
+  @@id([surf_spot_id, influencer_id])
+  @@index([influencer_id], map: "surfspot_influencer_influencer_id_foreign")
+}
+
+model SurfSpot_SurfBreakType {
+  surf_spot_id       Int           @db.UnsignedInt
+  surf_break_type_id Int           @db.UnsignedInt
+  SurfBreakType      SurfBreakType @relation(fields: [surf_break_type_id], references: [surf_break_type_id], onUpdate: Restrict, map: "surfspot_surfbreaktype_surf_break_type_id_foreign")
+  SurfSpot           SurfSpot      @relation(fields: [surf_spot_id], references: [surf_spot_id], onUpdate: Restrict, map: "surfspot_surfbreaktype_surf_spot_id_foreign")
+
+  @@id([surf_spot_id, surf_break_type_id])
+  @@index([surf_break_type_id], map: "surfspot_surfbreaktype_surf_break_type_id_foreign")
+}
+
+model SurfSpot_Traveller {
+  surf_spot_id Int       @db.UnsignedInt
+  traveller_id Int       @db.UnsignedInt
+  SurfSpot     SurfSpot  @relation(fields: [surf_spot_id], references: [surf_spot_id], onUpdate: Restrict, map: "surfspot_traveller_surf_spot_id_foreign")
+  Traveller    Traveller @relation(fields: [traveller_id], references: [traveller_id], onUpdate: Restrict, map: "surfspot_traveller_traveller_id_foreign")
+
+  @@id([surf_spot_id, traveller_id])
+  @@index([traveller_id], map: "surfspot_traveller_traveller_id_foreign")
+}
+
+model Thumbnail {
+  photo_id Int            @db.UnsignedInt
+  kind     Thumbnail_kind
+  url      String?        @db.Text
+  width    Int?
+  height   Int?
+  Photo    Photo          @relation(fields: [photo_id], references: [photo_id], onUpdate: Restrict, map: "thumbnail_photo_id_foreign")
+
+  @@id([photo_id, kind])
+}
+
+model Traveller {
+  traveller_id       Int                  @id @default(autoincrement()) @db.UnsignedInt
+  traveller_name     String               @db.VarChar(255)
+  SurfSpot_Traveller SurfSpot_Traveller[]
+}
+
+enum Thumbnail_kind {
+  small
+  large
+  full
+}

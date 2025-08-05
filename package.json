@@ -1,0 +1,124 @@
+{
+  "name": "shakadb",
+  "version": "1.0.5",
+  "description": "Shaka Database",
+  "main": "prisma/lib/client.js",
+  "types": "prisma/lib/client.d.ts",
+  "files": [
+    "prisma/generated",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
+    "build": "tsc -b",
+    "clean": "rm -rf dist prisma/generated node_modules package-lock.json tsconfig.tsbuildinfo",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:reset": "prisma migrate reset",
+    "prisma:migrate:reset:force": "prisma migrate reset --force",
+    "prisma:migrate:status": "prisma migrate status",
+    "prisma:db:seed": "prisma db seed",
+    "prisma:db:push": "prisma db push",
+    "prisma:db:pull": "prisma db pull",
+    "prisma:format": "prisma format",
+    "db:cleanup": "tsx prisma/helpers/cleanUp.ts",
+    "prisma:studio": "prisma studio",
+    "publish:package": "npm publish --access public",
+    "prepare": "husky",
+    "postinstall": "npm run prisma:generate",
+    "commit": "git-cz",
+    "commitlint": "commitlint --edit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "jest": {
+    "globalSetup": "./prisma/testSetup.ts",
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "transform": {
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "useESM": true
+        }
+      ]
+    },
+    "collectCoverageFrom": [
+      "**/*.{ts,js}"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^shakadb/(.*)$": "<rootDir>/prisma/$1"
+    }
+  },
+  "prisma": {
+    "seed": "tsx prisma/main.ts"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.28.0",
+    "@faker-js/faker": "^9.8.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.15.29",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "dotenv-cli": "^9.0.0",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "globals": "^16.2.0",
+    "husky": "^9.1.7",
+    "jest": "^30.0.2",
+    "lint-staged": "^16.1.0",
+    "prettier": "^3.5.3",
+    "prisma": "^6.11.1",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.4",
+    "typescript-eslint": "^8.33.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "argon2": "^0.43.0"
+  },
+  "lint-staged": {
+    "prisma/schema.prisma": [
+      "npm run prisma:format"
+    ],
+    "*.{js,ts,json}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
+  },
+  "validate-branch-name": {
+    "pattern": "^(master|main|develop){1}$|^(feature|fix|hotfix|release)/.+$",
+    "errorMsg": "Branch name must be master, main, develop, feature/xxx, fix/xxx, hotfix/xxx or release/xxx"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

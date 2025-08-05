@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "rootDir": "prisma",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "composite": true,
+    "incremental": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "shakadb/*": ["./prisma/*"]
+    }
+  },
+  "include": ["prisma"],
+  "exclude": ["node_modules", "dist", "prisma/generated"]
+}
