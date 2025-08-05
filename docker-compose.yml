@@ -1,7 +1,5 @@
 # docker-compose.yml
 
-version: "3.9"
-
 services:
   shakadb:
     container_name: shakadb

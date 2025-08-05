@@ -33,7 +33,7 @@
     "prisma:studio": "prisma studio",
     "publish:package": "npm publish --access public",
     "prepare": "husky",
-    "postinstall": "npm run prisma:generate && npm run build",
+    "postinstall": "npm run prisma:generate",
     "commit": "git-cz",
     "commitlint": "commitlint --edit"
   },
