@@ -5,7 +5,6 @@
   "main": "prisma/lib/client.js",
   "types": "prisma/lib/client.d.ts",
   "files": [
-    "prisma/generated",
     "dist"
   ],
   "publishConfig": {
