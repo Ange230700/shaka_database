@@ -1,11 +1,12 @@
 {
   "name": "shakadb",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Shaka Database",
   "main": "prisma/lib/client.js",
   "types": "prisma/lib/client.d.ts",
   "files": [
-    "dist"
+    "dist/lib",
+    "prisma/generated/prisma-client/"
   ],
   "publishConfig": {
     "access": "public"
