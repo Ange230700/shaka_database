@@ -41,6 +41,8 @@
   "scripts": {
     "pretest": "npm run prisma:format",
     "test": "dotenv -e .env -e .env.test -- jest",
+    "test:related": "dotenv -e .env -e .env.test -- jest --findRelatedTests --passWithNoTests",
+    "test:ci": "dotenv -e .env -e .env.test -- jest --runInBand --passWithNoTests",
     "docker:seed": "dotenv -e .env.docker -- npm run prisma:db:seed",
     "dev": "dotenv -e .env.local -- tsx prisma/main.ts",
     "lint": "eslint .",
@@ -142,7 +144,12 @@
     "prisma/schema.prisma": [
       "npm run prisma:format"
     ],
-    "*.{js,ts,json}": [
+    "*.{js,ts}": [
+      "prettier --write",
+      "eslint --cache --fix",
+      "npm run test:related --"
+    ],
+    "*.json": [
       "prettier --write",
       "eslint --cache --fix"
     ]
