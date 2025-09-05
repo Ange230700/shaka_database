@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2023",
-    "module": "ES2022",
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "outDir": "dist",
-    "rootDir": "prisma",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,12 +11,13 @@
     "declaration": true,
     "composite": true,
     "incremental": true,
-    "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "shakadb/*": ["./prisma/*"]
-    }
+      "shakadb/*": ["./prisma/*"],
+      "shakadb/generated/prisma-client": ["./prisma/generated/prisma-client"]
+    },
+    "types": ["node"]
   },
-  "include": ["prisma"],
-  "exclude": ["node_modules", "dist", "prisma/generated"]
+  "include": ["prisma/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

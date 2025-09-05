@@ -1,18 +1,18 @@
 # Dockerfile
 
+# build stage
 FROM node:24-alpine3.21 AS build
-
 WORKDIR /app
-
-COPY package.json package-lock.json ./
-COPY prisma ./prisma
-RUN npm install && npm run prisma:generate
-
+COPY package*.json ./
+ENV HUSKY=0
+RUN npm ci
 COPY . .
-RUN npm run build
+RUN npm run prisma:generate && npm run build
 
-ENV NODE_ENV=prod
-
-EXPOSE 4000
-
-CMD ["node", "dist/lib/client.js"]
+# run stage
+FROM node:24-alpine3.21
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app ./
+# apply DB state and exit
+CMD ["sh", "-c", "npm run prisma:db:push && npm run prisma:db:seed"]

@@ -1,14 +1,23 @@
 {
   "cSpell.words": [
+    "creds",
+    "darwin",
     "datasource",
+    "debian",
     "eslintcache",
     "github",
+    "healthcheck",
     "johndoe",
+    "linux",
     "mysql",
+    "mysqladmin",
     "openssl",
+    "Prereqs",
     "prisma",
     "randompassword",
+    "shaka",
     "shakadb",
+    "surfbreaktype",
     "surfspot"
   ]
 }

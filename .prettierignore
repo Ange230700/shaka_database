@@ -5,4 +5,13 @@ node_modules
 .vscode
 package-lock.json
 dist
+dist-ssr
 prisma/generated
+.DS_Store
+*.local
+.env
+.env.test
+.env.prod
+.eslintcache
+coverage
+tsconfig.tsbuildinfo

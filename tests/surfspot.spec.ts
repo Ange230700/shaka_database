@@ -1,7 +1,8 @@
-// prisma\tests\surfspot.spec.ts
+// tests\surfspot.spec.ts
 
 import prisma from "shakadb/lib/client";
 import { faker } from "@faker-js/faker";
+import { deleteSafely } from "shakadb/helpers";
 
 function makeGeocodeRaw() {
   const value = {
@@ -30,7 +31,7 @@ describe("SurfSpot CRUD operations", () => {
   });
 
   afterAll(async () => {
-    await prisma.surfSpot.deleteMany();
+    await deleteSafely(() => prisma.surfSpot.deleteMany(), "surfspot (tests)");
     await prisma.$disconnect();
   });
 

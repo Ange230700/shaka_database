@@ -2,11 +2,35 @@
   "name": "shakadb",
   "version": "1.0.2",
   "description": "Shaka Database",
-  "main": "prisma/lib/client.js",
-  "types": "prisma/lib/client.d.ts",
+  "main": "dist/prisma/lib/client.js",
+  "types": "dist/prisma/lib/client.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/prisma/lib/client.d.ts",
+      "default": "./dist/prisma/lib/client.js"
+    },
+    "./lib/client": {
+      "types": "./dist/prisma/lib/client.d.ts",
+      "default": "./dist/prisma/lib/client.js"
+    },
+    "./helpers": {
+      "types": "./dist/prisma/helpers/index.d.ts",
+      "default": "./dist/prisma/helpers/index.js"
+    },
+    "./seed": {
+      "types": "./dist/prisma/seed.d.ts",
+      "default": "./dist/prisma/seed.js"
+    },
+    "./prisma/schema.prisma": "./prisma/schema.prisma",
+    "./generated/prisma-client": {
+      "types": "./prisma/generated/prisma-client/index.d.ts",
+      "default": "./prisma/generated/prisma-client/index.js"
+    }
+  },
   "files": [
-    "dist/lib",
-    "prisma/generated/prisma-client/"
+    "dist/**",
+    "prisma/**",
+    "package.json"
   ],
   "publishConfig": {
     "access": "public"
@@ -15,10 +39,16 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "jest",
+    "pretest": "npm run prisma:format",
+    "test": "dotenv -e .env -e .env.test -- jest",
+    "docker:seed": "dotenv -e .env.docker -- npm run prisma:db:seed",
+    "dev": "dotenv -e .env.local -- tsx prisma/main.ts",
     "lint": "eslint .",
-    "build": "tsc -b",
-    "clean": "rm -rf dist prisma/generated node_modules package-lock.json tsconfig.tsbuildinfo",
+    "build": "tsc -b && tsc-alias -p tsconfig.json",
+    "prepack": "npm run prisma:generate && npm run build",
+    "soft:clean": "rm -rf dist prisma/generated node_modules tsconfig.tsbuildinfo",
+    "hard:clean": "rm -rf dist prisma/generated node_modules package-lock.json tsconfig.tsbuildinfo",
+    "prepublishOnly": "npm run prisma:generate && npm run build",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
@@ -34,10 +64,11 @@
     "publish:package": "npm publish --access public",
     "prepare": "husky",
     "commit": "git-cz",
-    "commitlint": "commitlint --edit"
+    "commitlint": "commitlint --edit",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ange230700",
   "license": "ISC",
   "type": "module",
   "jest": {
@@ -61,12 +92,16 @@
       ]
     },
     "collectCoverageFrom": [
-      "**/*.{ts,js}"
+      "prisma/**/*.{ts,js}",
+      "tests/**/*.{ts,js}",
+      "!prisma/generated/**",
+      "!dist/**"
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^shakadb/(.*)$": "<rootDir>/prisma/$1"
+      "^shakadb/(.*)$": "<rootDir>/prisma/$1",
+      "^shakadb1/(.*)$": "<rootDir>/tests/$1"
     }
   },
   "prisma": {
@@ -77,7 +112,7 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.28.0",
     "@faker-js/faker": "^9.8.0",
-    "@types/jest": "^30.0.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.15.29",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
@@ -87,16 +122,17 @@
     "eslint-plugin-prettier": "^5.4.1",
     "globals": "^16.2.0",
     "husky": "^9.1.7",
-    "jest": "^30.0.2",
+    "jest": "^29.7.0",
     "lint-staged": "^16.1.0",
     "prettier": "^3.5.3",
     "prisma": "^6.11.1",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.4",
-    "typescript-eslint": "^8.33.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.1"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",

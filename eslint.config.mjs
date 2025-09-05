@@ -18,14 +18,11 @@ export default defineConfig([
   ]),
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    plugins: { js },
-    extends: ["js/recommended"],
-  },
-  {
-    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     languageOptions: { globals: globals.node },
+    rules: {}, // your custom JS/TS rules here
   },
-  tseslint.configs.recommended,
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   eslintConfigPrettier,
   eslintPluginPrettierRecommended,
 ]);
