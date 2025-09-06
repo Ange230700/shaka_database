@@ -1,6 +1,6 @@
 {
   "name": "shakadb",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Shaka Database",
   "main": "dist/prisma/lib/client.js",
   "types": "dist/prisma/lib/client.d.ts",
