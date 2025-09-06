@@ -6,23 +6,16 @@ const config: Config = {
   testEnvironment: "node",
   rootDir: ".",
   testRegex: ".*\\.spec\\.ts$",
-  moduleFileExtensions: ["ts", "js", "json"],
-
-  // TS for tests (ESM)
+  moduleFileExtensions: ["ts", "js", "json", "mjs", "cjs"],
   transform: {
     "^.+\\.ts$": ["ts-jest", { useESM: true, tsconfig: "tsconfig.jest.json" }],
   },
-
-  // Fix TS->ESM path rewrites like `import './x.js'` in compiled output
+  extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
     "^shakadb/(.*)$": "<rootDir>/prisma/$1",
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-
-  // Required by ts-jest ESM path resolution
-  extensionsToTreatAsEsm: [".ts"],
-
-  // Optional but handy
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   collectCoverageFrom: [
     "prisma/**/*.{ts,js}",
     "tests/**/*.{ts,js}",

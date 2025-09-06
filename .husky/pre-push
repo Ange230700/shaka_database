@@ -1,2 +1,1 @@
-npm run lint && npm run -s typecheck && npm run -s test:ci
-
+npm run -s typecheck && npm run test

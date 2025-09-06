@@ -40,9 +40,9 @@
   },
   "scripts": {
     "pretest": "npm run prisma:format",
-    "test": "dotenv -e .env -e .env.test -- jest",
-    "test:related": "dotenv -e .env -e .env.test -- jest --findRelatedTests --passWithNoTests",
-    "test:ci": "dotenv -e .env -e .env.test -- jest --runInBand --passWithNoTests",
+    "test": "dotenv -e .env -e .env.test -- node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:related": "dotenv -e .env -e .env.test -- node --experimental-vm-modules ./node_modules/jest/bin/jest.js --findRelatedTests --passWithNoTests",
+    "test:ci": "dotenv -e .env -e .env.test -- node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --passWithNoTests",
     "docker:seed": "dotenv -e .env.docker -- npm run prisma:db:seed",
     "dev": "dotenv -e .env.local -- tsx prisma/main.ts",
     "lint": "eslint .",
