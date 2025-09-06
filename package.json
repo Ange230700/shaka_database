@@ -73,39 +73,6 @@
   "author": "Ange230700",
   "license": "ISC",
   "type": "module",
-  "jest": {
-    "globalSetup": "./prisma/testSetup.ts",
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ],
-    "transform": {
-      "^.+\\.(t|j)s$": [
-        "ts-jest",
-        {
-          "useESM": true
-        }
-      ]
-    },
-    "collectCoverageFrom": [
-      "prisma/**/*.{ts,js}",
-      "tests/**/*.{ts,js}",
-      "!prisma/generated/**",
-      "!dist/**"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "moduleNameMapper": {
-      "^shakadb/(.*)$": "<rootDir>/prisma/$1",
-      "^shakadb1/(.*)$": "<rootDir>/tests/$1"
-    }
-  },
   "prisma": {
     "seed": "tsx prisma/main.ts"
   },

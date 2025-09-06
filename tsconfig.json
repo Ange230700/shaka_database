@@ -1,5 +1,7 @@
+// tsconfig.json
 {
   "compilerOptions": {
+    "rootDir": ".",
     "target": "ES2023",
     "module": "node16",
     "moduleResolution": "node16",
@@ -18,6 +20,6 @@
     },
     "types": ["node"]
   },
-  "include": ["prisma/**/*.ts"],
+  "include": ["prisma/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
