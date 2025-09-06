@@ -1,30 +1,30 @@
 # docker-compose.yml
 services:
+  mysql:
+    image: mysql:8.3
+    environment:
+      MYSQL_ROOT_PASSWORD: shaka_root_pw
+      MYSQL_DATABASE: shaka
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pshaka_root_pw"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   shakadb:
-    env_file:
-    - .env.docker
     build: .
     depends_on:
       mysql:
         condition: service_healthy
     environment:
-      - DATABASE_URL=mysql://johndoe:ShAkA1234%25%40@mysql:3306/shaka
-    command: sh -c "npm run prisma:db:push && npm run prisma:db:seed && echo 'Done' && sleep 1"
-
-  mysql:
-    image: mysql:8.3
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 5s
-      timeout: 2s
-      retries: 20
-    volumes:
-      - mysql_data:/var/lib/mysql
+      PRISMA_DISABLE_ENV_LOAD: "1"
+      DATABASE_URL: mysql://root:shaka_root_pw@mysql:3306/shaka
+    command: >
+      sh -c "npm run prisma:db:push &&
+             npm run prisma:db:seed &&
+             echo 'Done' && sleep 1"
 
 volumes:
   mysql_data:

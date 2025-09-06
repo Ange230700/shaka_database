@@ -14,10 +14,12 @@
     "openssl",
     "Prereqs",
     "prisma",
+    "pshaka",
     "randompassword",
     "shaka",
     "shakadb",
     "surfbreaktype",
-    "surfspot"
+    "surfspot",
+    "uroot"
   ]
 }
