@@ -6,6 +6,7 @@ import {
   asBasicDelegate,
 } from "shakadb/helpers";
 import { faker } from "@faker-js/faker";
+import type { Traveller, Influencer } from "shakadb/generated/prisma-client";
 
 faker.seed(12345);
 
@@ -91,6 +92,45 @@ async function deleteSurfData() {
   );
 }
 
+/** Top-up helper: ensure we have at least `target` rows */
+async function ensureMinimum(
+  label: "traveller",
+  target: number,
+): Promise<Traveller[]>;
+async function ensureMinimum(
+  label: "influencer",
+  target: number,
+): Promise<Influencer[]>;
+async function ensureMinimum(
+  label: "traveller" | "influencer",
+  target: number,
+) {
+  if (label === "traveller") {
+    const count = await prisma.traveller.count();
+    if (count < target) {
+      const toCreate = target - count;
+      await prisma.traveller.createMany({
+        data: Array.from({ length: toCreate }, () => ({
+          traveller_name: faker.person.fullName(),
+        })),
+      });
+    }
+    return prisma.traveller.findMany();
+  }
+
+  // influencer
+  const count = await prisma.influencer.count();
+  if (count < target) {
+    const toCreate = target - count;
+    await prisma.influencer.createMany({
+      data: Array.from({ length: toCreate }, () => ({
+        influencer_name: faker.internet.username(),
+      })),
+    });
+  }
+  return prisma.influencer.findMany();
+}
+
 export async function seed(skipCleanup = false) {
   const TIMER = "🌱 Seeding database with fake data…";
   console.time(TIMER);
@@ -101,142 +141,136 @@ export async function seed(skipCleanup = false) {
     console.log("⚠️ Skipping cleanup (SKIP_CLEANUP=true)");
   }
 
-  // Travellers
-  const travellers = await Promise.all(
-    Array.from({ length: 10 }).map(() =>
-      prisma.traveller.create({
-        data: { traveller_name: faker.person.fullName() },
-      }),
-    ),
-  );
+  // --- Idempotent reference data ---
 
-  // Influencers
-  const influencers = await Promise.all(
-    Array.from({ length: 5 }).map(() =>
-      prisma.influencer.create({
-        data: { influencer_name: faker.internet.username() },
-      }),
-    ),
-  );
-
-  // SurfBreakTypes
+  // SurfBreakTypes (unique by name)
   const breakTypesSeed = [
     "Point break",
     "Beach break",
     "Reef break",
     "River mouth",
   ];
-  const breakTypes = await Promise.all(
-    breakTypesSeed.map((name) =>
-      prisma.surfBreakType.create({ data: { surf_break_type_name: name } }),
-    ),
-  );
+  await prisma.surfBreakType.createMany({
+    data: breakTypesSeed.map((name) => ({ surf_break_type_name: name })),
+    skipDuplicates: true,
+  });
+  const breakTypes = await prisma.surfBreakType.findMany();
 
-  // SurfSpots with Photos & Thumbnails
-  const spots = [];
-  for (let i = 0; i < 15; i++) {
-    // Ensure end date is after begin
-    const start = faker.date.soon({ days: 30 });
-    const end = faker.date.soon({ days: 180, refDate: start });
+  // Travellers & Influencers (top up to targets; then read)
+  const travellers = await ensureMinimum("traveller", 10);
+  const influencers = await ensureMinimum("influencer", 5);
 
-    const spot = await prisma.surfSpot.create({
-      data: {
-        destination: faker.location.city(),
-        address: faker.location.streetAddress(),
-        state_country: faker.location.country(),
-        difficulty_level: faker.number.int({ min: 1, max: 5 }),
-        peak_season_begin: start,
-        peak_season_end: end,
-        magic_seaweed_link: faker.internet.url(),
-        created_time: new Date(),
-        geocode_raw: makeGeocodeRaw(),
-      },
-    });
-    spots.push(spot);
-
-    // One main photo
-    const photo = await prisma.photo.create({
-      data: {
-        surf_spot_id: spot.surf_spot_id,
-        width: 1920,
-        height: 1080,
-        url: faker.image.url(),
-        filename: faker.system.fileName(),
-        size_bytes: faker.number.int({ min: 50_000, max: 5_000_000 }),
-        mime_type: "image/jpeg",
-      },
-    });
-
-    // Thumbnails (all enum sizes)
-    await prisma.thumbnail.createMany({
-      data: [
-        {
-          photo_id: photo.photo_id,
-          kind: "small",
-          url: faker.image.url(),
-          width: 320,
-          height: 180,
-        },
-        {
-          photo_id: photo.photo_id,
-          kind: "large",
-          url: faker.image.url(),
-          width: 1280,
-          height: 720,
-        },
-        {
-          photo_id: photo.photo_id,
-          kind: "full",
-          url: faker.image.url(),
-          width: 1920,
-          height: 1080,
-        },
-      ],
-      skipDuplicates: true,
-    });
+  // --- Heavy data (guard when skipCleanup is true) ---
+  let shouldCreateSpots = true;
+  if (skipCleanup) {
+    const spotCount = await prisma.surfSpot.count();
+    if (spotCount > 0) {
+      console.log(
+        "↪ Data already present; skipping heavy reseed of spots/photos/pivots.",
+      );
+      shouldCreateSpots = false;
+    }
   }
 
-  // Randomize pivot links
-  // - Each spot gets 1–3 influencers, 1–3 travellers, 1–2 break types
-  for (const spot of spots) {
-    // Influencers
-    const infl = faker.helpers.arrayElements(influencers, {
-      min: 1,
-      max: Math.min(3, influencers.length),
-    });
-    await prisma.surfSpot_Influencer.createMany({
-      data: infl.map((i) => ({
-        surf_spot_id: spot.surf_spot_id,
-        influencer_id: i.influencer_id,
-      })),
-      skipDuplicates: true,
-    });
+  if (shouldCreateSpots) {
+    const spots = [];
+    for (let i = 0; i < 15; i++) {
+      const start = faker.date.soon({ days: 30 });
+      const end = faker.date.soon({ days: 180, refDate: start });
 
-    // Travellers
-    const travs = faker.helpers.arrayElements(travellers, {
-      min: 1,
-      max: Math.min(3, travellers.length),
-    });
-    await prisma.surfSpot_Traveller.createMany({
-      data: travs.map((t) => ({
-        surf_spot_id: spot.surf_spot_id,
-        traveller_id: t.traveller_id,
-      })),
-      skipDuplicates: true,
-    });
+      const spot = await prisma.surfSpot.create({
+        data: {
+          destination: faker.location.city(),
+          address: faker.location.streetAddress(),
+          state_country: faker.location.country(),
+          difficulty_level: faker.number.int({ min: 1, max: 5 }),
+          peak_season_begin: start,
+          peak_season_end: end,
+          magic_seaweed_link: faker.internet.url(),
+          created_time: new Date(),
+          geocode_raw: makeGeocodeRaw(),
+        },
+      });
+      spots.push(spot);
 
-    // Break types
-    const breaks = faker.helpers.arrayElements(breakTypes, {
-      min: 1,
-      max: Math.min(2, breakTypes.length),
-    });
-    await prisma.surfSpot_SurfBreakType.createMany({
-      data: breaks.map((b) => ({
-        surf_spot_id: spot.surf_spot_id,
-        surf_break_type_id: b.surf_break_type_id,
-      })),
-      skipDuplicates: true,
-    });
+      const photo = await prisma.photo.create({
+        data: {
+          surf_spot_id: spot.surf_spot_id,
+          width: 1920,
+          height: 1080,
+          url: faker.image.url(),
+          filename: faker.system.fileName(),
+          size_bytes: faker.number.int({ min: 50_000, max: 5_000_000 }),
+          mime_type: "image/jpeg",
+        },
+      });
+
+      await prisma.thumbnail.createMany({
+        data: [
+          {
+            photo_id: photo.photo_id,
+            kind: "small",
+            url: faker.image.url(),
+            width: 320,
+            height: 180,
+          },
+          {
+            photo_id: photo.photo_id,
+            kind: "large",
+            url: faker.image.url(),
+            width: 1280,
+            height: 720,
+          },
+          {
+            photo_id: photo.photo_id,
+            kind: "full",
+            url: faker.image.url(),
+            width: 1920,
+            height: 1080,
+          },
+        ],
+        skipDuplicates: true,
+      });
+    }
+
+    // Randomize pivots with createMany + skipDuplicates
+    for (const spot of spots) {
+      const infl = faker.helpers.arrayElements(influencers, {
+        min: 1,
+        max: Math.min(3, influencers.length),
+      });
+      await prisma.surfSpot_Influencer.createMany({
+        data: infl.map((i) => ({
+          surf_spot_id: spot.surf_spot_id,
+          influencer_id: i.influencer_id,
+        })),
+        skipDuplicates: true,
+      });
+
+      const travs = faker.helpers.arrayElements(travellers, {
+        min: 1,
+        max: Math.min(3, travellers.length),
+      });
+      await prisma.surfSpot_Traveller.createMany({
+        data: travs.map((t) => ({
+          surf_spot_id: spot.surf_spot_id,
+          traveller_id: t.traveller_id,
+        })),
+        skipDuplicates: true,
+      });
+
+      const breaks = faker.helpers.arrayElements(breakTypes, {
+        min: 1,
+        max: Math.min(2, breakTypes.length),
+      });
+      await prisma.surfSpot_SurfBreakType.createMany({
+        data: breaks.map((b) => ({
+          surf_spot_id: spot.surf_spot_id,
+          surf_break_type_id: b.surf_break_type_id,
+        })),
+        skipDuplicates: true,
+      });
+    }
   }
 
   console.timeEnd(TIMER);
