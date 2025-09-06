@@ -23,6 +23,7 @@ const config: Config = {
     "!dist/**",
   ],
   coverageDirectory: "./coverage",
+  globalSetup: "<rootDir>/prisma/testSetup.ts",
 };
 
 export default config;
