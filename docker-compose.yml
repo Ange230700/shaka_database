@@ -2,9 +2,12 @@
 services:
   mysql:
     image: mysql:8.3
+    ports:
+      - 3307:3306
     environment:
       MYSQL_ROOT_PASSWORD: shaka_root_pw
       MYSQL_DATABASE: shaka
+    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pshaka_root_pw"]
       interval: 5s
