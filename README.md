@@ -1,3 +1,5 @@
+<!-- shaka_database\README.md -->
+
 # ShakaDB — Prisma/MySQL package for the Shaka ecosystem
 
 **ShakaDB** is a self-contained Prisma + MySQL data layer you can consume as an NPM package. It ships with a production-ready Prisma client, a normalized schema for surf destinations, ergonomic cleanup/seed helpers, ESM-friendly Jest setup, Docker compose for local MySQL, and CI that validates migrations, build, lint, and tests.
