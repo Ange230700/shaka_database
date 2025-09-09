@@ -126,3 +126,96 @@ await quickOrPurgeByCompositeKey(
 * `shakadb/seed` → `seed()` function
 * `shakadb/generated/prisma-client` → raw generated client (types + JS)
 * `shakadb/prisma/schema.prisma` → schema source
+
+## 📊 Entity-Relationship Diagram
+
+The schema below represents the ShakaDB data layer: surf spots, their photos/thumbnails, and M:N relations with influencers, travellers, and break types.
+
+```mermaid
+erDiagram
+    %% =========================
+    %% Core entities
+    %% =========================
+    SurfSpot ||--o{ Photo : has
+    Photo    ||--o{ Thumbnail : has
+
+    %% M:N via pivots
+    SurfSpot ||--o{ SurfSpot_Influencer : links
+    Influencer ||--o{ SurfSpot_Influencer : links
+
+    SurfSpot ||--o{ SurfSpot_Traveller : links
+    Traveller ||--o{ SurfSpot_Traveller : links
+
+    SurfSpot ||--o{ SurfSpot_SurfBreakType : links
+    SurfBreakType ||--o{ SurfSpot_SurfBreakType : links
+
+    %% =========================
+    %% Tables (fields & types)
+    %% =========================
+    SurfSpot {
+      int      surf_spot_id PK
+      string   destination
+      string   address
+      string   state_country
+      int      difficulty_level
+      date     peak_season_begin
+      date     peak_season_end
+      string   magic_seaweed_link
+      datetime created_time
+      string   geocode_raw
+    }
+
+    Photo {
+      int      photo_id PK
+      int      surf_spot_id FK
+      int      width
+      int      height
+      string   url
+      string   filename
+      int      size_bytes
+      string   mime_type
+    }
+
+    Thumbnail {
+      int      photo_id PK, FK
+      string   kind PK
+      string   url
+      int      width
+      int      height
+    }
+
+    Influencer {
+      int     influencer_id PK
+      string  influencer_name
+    }
+
+    Traveller {
+      int     traveller_id PK
+      string  traveller_name
+    }
+
+    SurfBreakType {
+      int     surf_break_type_id PK
+      string  surf_break_type_name
+    }
+
+    SurfSpot_Influencer {
+      int   surf_spot_id  PK, FK
+      int   influencer_id PK, FK
+    }
+
+    SurfSpot_Traveller {
+      int   surf_spot_id  PK, FK
+      int   traveller_id  PK, FK
+    }
+
+    SurfSpot_SurfBreakType {
+      int   surf_spot_id       PK, FK
+      int   surf_break_type_id PK, FK
+    }
+
+    %% (Optional) direct M:N visual helpers
+    SurfSpot }o--o{ Influencer : "via SurfSpot_Influencer"
+    SurfSpot }o--o{ Traveller : "via SurfSpot_Traveller"
+    SurfSpot }o--o{ SurfBreakType : "via SurfSpot_SurfBreakType"
+```
